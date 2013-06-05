@@ -1,0 +1,31 @@
+﻿<%@ Master Language="C#" Inherits="System.Web.Mvc.ViewMasterPage" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <link href="/Content/Site.css" rel="Stylesheet" type="text/css" />
+    <link rel="stylesheet" href="http://localhost:8301/Content/web/kendo.common.min.css" />
+    <link rel="stylesheet" href="http://localhost:8301/Content/web/kendo.rtl.min.css"/>
+    <link rel="stylesheet" href="http://localhost:8301/Content/web/kendo.default.min.css"/>
+    <link rel="stylesheet" href="http://localhost:8301/Content/shared/examples-offline.css"/>
+    <script type="text/javascript" src="http://localhost:8301/Scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="http://localhost:8301/Scripts/kendo.web.min.js"></script>
+    <script type="text/javascript" src="http://localhost:8301/Scripts/kendo.aspnetmvc.min.js"></script>
+    <script type="text/javascript" src="http://localhost:8301/Scripts/console.min.js"></script>
+    <script type="text/javascript" src="http://localhost:8301/Scripts/prettify.min.js"></script>
+    <title>
+        <asp:ContentPlaceHolder ID="TitleContent" runat="server" />
+    </title>
+</head>
+<body>
+    <div>
+        <div id="header">
+            <h4>Welcome to Srigopal's ASP.NET MVC Demos</h4>
+            <ul id="navlist">
+                <li class="first"><a href="/" id="current">SelectColor</a></li>
+            </ul>
+        </div>
+        <asp:ContentPlaceHolder ID="MainContent" runat="server">
+        </asp:ContentPlaceHolder>
+    </div>
+</body>
+</html>
