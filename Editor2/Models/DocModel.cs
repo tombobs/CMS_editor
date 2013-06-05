@@ -19,7 +19,7 @@ namespace Editor2.Models
         public string Type;
 
         [XmlElement]
-        public List<Element> elements = new List<Element>();
+        public List<Element> Elements = new List<Element>();
 
         [XmlAttribute]
         public Boolean StandardFormat;
@@ -35,45 +35,45 @@ namespace Editor2.Models
 
         public void InsertElement(Element element, int pos) // offset = displacement from first element (0 = add as first element)
         {
-            if (this.elements.Count < pos)
+            if (this.Elements.Count < pos)
             {
-                throw new Exception("Cannot insert at position : " + pos + ", there are only " + this.elements.Count + " elements in this doc.");
+                throw new Exception("Cannot insert at position : " + pos + ", there are only " + this.Elements.Count + " elements in this doc.");
             }
-            this.elements.Insert(pos, element);
+            this.Elements.Insert(pos, element);
         }
 
         public void AddElement(Element element)
         {
-            this.elements.Add(element);
+            this.Elements.Add(element);
         }
 
         public Element getElementByPosition(int position)
         {
-            if (this.elements.Count < position)
+            if (this.Elements.Count < position)
             {
                 return null;
             }
-            return this.elements[position];
+            return this.Elements[position];
         }
 
         public Element getElementByGuid(Guid guid)
         {
-            Element result = this.elements.Find(
-            delegate(Element bk)
-            {
-                return bk.id == guid;
-            }
+            Element result = this.Elements.Find(
+                delegate(Element bk)
+                {
+                    return bk.ElementId == guid;
+                }
             );
             return result;
         }
 
         public Boolean ElementExists(Guid guid)
         {            
-            Element result = this.elements.Find(
-            delegate(Element bk)
-            {
-                return bk.id == guid;
-            }
+            Element result = this.Elements.Find(
+                delegate(Element bk)
+                {
+                    return bk.ElementId == guid;
+                }
             );
             return (result != null);
         }

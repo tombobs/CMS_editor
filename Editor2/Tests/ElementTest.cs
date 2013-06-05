@@ -16,7 +16,7 @@ namespace Editor2.Tests
             Element expected = new Element();
             doc.AddElement(expected);
 
-            Guid ExpectedGuid = expected.id;
+            Guid ExpectedGuid = expected.ElementId;
 
             Element actual = doc.getElementByGuid(ExpectedGuid);
 

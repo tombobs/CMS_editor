@@ -10,23 +10,20 @@ namespace Editor2.Models
     {
         public Element()
         {
-            id = Guid.NewGuid();
+            ElementId = Guid.NewGuid();
         }
 
         [XmlAttribute]
         public Boolean IsSubElement;
 
         [XmlElement]
-        public Guid id;
+        public Guid ElementId;
 
         [XmlElement]
         public string Content;
 
         [XmlElement]
         public List<Element> SubElements;
-
-        [XmlAttribute]
-        public int DocId;
 
         [XmlAttribute]
         public int Postion;

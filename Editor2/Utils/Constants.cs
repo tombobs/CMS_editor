@@ -7,6 +7,7 @@ namespace Editor2.Utils
 {
     public static class Constants
     {
-        public static string FolderPath = "C:\\Users\\TomR\\CMS\\";
+        public static string XMLFolderPath = "C:\\Users\\TomR\\CMS\\XML\\";
+        public static string HTMLFolderPath = "C:\\Users\\TomR\\CMS\\HTML\\";
     }
 }

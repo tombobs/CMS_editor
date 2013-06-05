@@ -11,6 +11,8 @@ namespace Editor2
     {
         public static void RegisterRoutes(RouteCollection routes)
         {
+            routes.IgnoreRoute("EditorApi.asmx");
+            routes.IgnoreRoute("EditorApi.asmx/AddElementToDoc");
             routes.IgnoreRoute("EditorApi.asmx/TestHtml");
             routes.IgnoreRoute("EditorApi.asmx/CreateNewDoc");
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");

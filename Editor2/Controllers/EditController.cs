@@ -22,13 +22,13 @@ namespace Editor2.Controllers
 
             Element el1 = new Element();
             el1.Content = "content of el1";
-            el1.DocId = 1;
+            
             el1.Postion = 2;
             el1.Type = "Text";
 
             Element el2 = new Element();
             el2.Content = "content of el2";
-            el2.DocId = 1;
+            
             el2.Postion = 1;
             el2.Type = "Text";
 
@@ -46,8 +46,8 @@ namespace Editor2.Controllers
             el1.SubElements.Add(sub1);
             el1.SubElements.Add(sub2);
 
-            doc.elements.Add(el1);
-            doc.elements.Add(el2);
+            doc.Elements.Add(el1);
+            doc.Elements.Add(el2);
             //doc.elements
 
 

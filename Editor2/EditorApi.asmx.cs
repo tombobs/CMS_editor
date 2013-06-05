@@ -25,12 +25,24 @@ namespace Editor2
 
      //   public string FolderPath = 
 
+        [WebMethod]
+        public void AddElementToDoc(string DocTitle, string DocType, string ElementContent, string ElementType, int pos)
+        {
+            Element element = new Element();
+            element.Content = ElementContent;
+            element.Type = ElementType;
+            element.Postion = pos;
+
+            DocModel doc = SerialisationService.GetDocByTitleAndType(DocTitle, DocType);
+            doc.AddElement(element);
+            UpdateDoc(doc);
+        }
 
 
        [WebMethod]
         public XmlDocument GetDocXml(string title)
         {
-            System.IO.StreamReader read = new System.IO.StreamReader(Constants.FolderPath + title + ".xml");
+            System.IO.StreamReader read = new System.IO.StreamReader(Constants.XMLFolderPath + title + ".xml");
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(read.ReadToEnd());
             return xmlDoc;
@@ -72,19 +84,14 @@ namespace Editor2
         //public void AddElementToDoc(
 
         [WebMethod]
-        public void EditElementInDoc(string nameOfDoc, Guid element_id, string updatedContent)
+        public void EditElementInDoc(string title, string type, Guid element_id, string updatedContent)
         {
-            //get the doc
-            DocModel document = new DocModel();
-            XmlSerializer x = new XmlSerializer(document.GetType());
-            var obj = x.Deserialize(new StreamReader(Constants.FolderPath + nameOfDoc));
-            document = (DocModel)obj;
-            // get old element
+            DocModel document = SerialisationService.GetDocByTitleAndType(title, type);
             Element element = document.getElementByGuid(element_id);
-            int pos = document.elements.IndexOf(element);
-            document.elements.Remove(element);            
+            int pos = document.Elements.IndexOf(element);
+            document.Elements.Remove(element);            
             element.Content = updatedContent;
-            document.elements.Insert(pos, element);
+            document.Elements.Insert(pos, element);
             UpdateDoc(document);
         }
 
@@ -102,10 +109,16 @@ namespace Editor2
             SerialisationService.SerialiseDoc(doc);
         }
 
+        [WebMethod]
+        public string TestHtml(string title, string type)
+        {
+            DocModel doc = SerialisationService.GetDocByTitleAndType(title, type);
+            return HtmlWriter.GenerateHtml(doc);            
+        }
        
 
         [WebMethod]
-        public string TestHtml()
+        public string TestHtml2()
         {
             DocModel doc = new DocModel();
             doc.StandardFormat = true;
@@ -115,13 +128,13 @@ namespace Editor2
 
             Element el1 = new Element();
             el1.Content = "content of el1";
-            el1.DocId = 1;
+            
             el1.Postion = 2;
             el1.Type = "Text";
 
             Element el2 = new Element();
             el2.Content = "content of el2";
-            el2.DocId = 1;
+            
             el2.Postion = 1;
             el2.Type = "Text";
 
@@ -141,8 +154,8 @@ namespace Editor2
             el1.SubElements.Add(sub1);
             el1.SubElements.Add(sub2);
 
-            doc.elements.Add(el1);
-            doc.elements.Add(el2);
+            doc.Elements.Add(el1);
+            doc.Elements.Add(el2);
             //doc.elements
 
 

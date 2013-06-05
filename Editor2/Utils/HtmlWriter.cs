@@ -12,6 +12,37 @@ namespace Editor2.Utils
     {
         public static Dictionary<string, string> Mappings = new Dictionary<string, string>();
         //private static string FolderPath = "C:\\Users\\TomR\\";
+        private static string ffs = @"<script>
+
+                                    $('div.multi-element').hover(function(){
+                                        jQuery(this).css({ ""border"": ""2px solid red"" });
+    
+                                    },function(){
+                                        jQuery(this).css({ ""border"": ""none"" });
+                                    });
+
+                                    $('div.element').hover(function(){
+                                        jQuery(this).css({ ""border"": ""2px solid red"" });
+    
+                                    },function(){
+                                        jQuery(this).css({ ""border"": ""none"" });
+                                    });
+
+                                    $('div.element').click( function (e) {
+	                                    var id = $(this).attr('id');
+	                                    $('#edit-element').html(
+		                                    $(this).html())
+	                                    $('#edit-element').attr('contentEditable', true);
+	
+	                                    $('#myModal').toggle();
+                                    })
+                                    //$('#modal-title').html($(
+
+                                    var children = $('div.multi-element').children();
+
+
+                                    </script>";
+
 
         public static void SetUpMappings()
         {
@@ -32,7 +63,7 @@ namespace Editor2.Utils
                                     <h3 id=""modal-title"">Editing - [PAGE_TITLE]</h3>
                                 </div>
                                 <div class=""modal-body"">
-                                    <p id=""edit-elem-content"">[CLICKED_ELEMENT]</p>
+                                    <p id=""edit-element"">[CLICKED_ELEMENT]</p>
                                 </div>
                                 <div class=""modal-footer"">
                                     <button class=""btn"" data-dismiss=""modal"" aria-hidden=""true"">Close</button>
@@ -45,17 +76,15 @@ namespace Editor2.Utils
 
             sb.AppendLine("<html lang=\"en\">");
             
-            sb.AppendLine("<head>");
-            
+            sb.AppendLine("<head>");            
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/docs.css\"></link>");
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/bootstrap-responsive.css\"></link>");
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/bootstrap.css\"></link>");
-            
-            //sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/js/google-code-prettify/prettify.css\"></script>");
-            sb.AppendLine("<script src=\"Scripts\\Editor.js\"></script>");
+            sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/jquery.js\"></script>");
+            sb.AppendLine("<script type=\"text/javascript\" src=\"Editor.js\"></script>");
             sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/bootstrap-modal.js\"></script>");
             sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/holder/holder.js\"></script>");
-            sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/jquery.js\"></script>");
+            
             sb.AppendLine("</head>");
 
             sb.AppendLine("<body>");
@@ -65,29 +94,35 @@ namespace Editor2.Utils
             sb.AppendLine("<h2 id=\"page-title\">" + doc.Title + "</h2>");
 
             sb.AppendLine("<div id=\"container\">");
-            foreach (Element el in doc.elements)
+            foreach (Element el in doc.Elements)
             {
                 if (el.SubElements == null || el.SubElements.Count == 0)
                 {
-                    sb.AppendLine("<div class=\"element\"> id=\"" + el.id + "\"");
+                    sb.AppendLine("<div class=\"element\" id=\"" + el.ElementId + "\">");
                     sb.AppendLine(HandleElement(el));
                     sb.AppendLine("</div>");
                 }
                 else
                 {
-                    sb.AppendLine("<div class=\"multi-element\" id=\"" + el.id + "\">");
+                    sb.AppendLine("<div class=\"multi-element\" id=\"" + el.ElementId + "\">");
                     sb.AppendLine(HandleSubElements(el));
                     sb.AppendLine("</div>");
                 }
             }
             sb.AppendLine("</div>");
             sb.AppendLine("</div>");
+
+            // FNAR : chrome won't load .js file so I#'m puting the script here.. sigh :(
+            sb.Append(ffs);
+
+
+
             sb.AppendLine("</body>");
 
             sb.AppendLine("</html>");
 
 
-            StreamWriter writer = new StreamWriter(Constants.FolderPath + doc.Title + "_" + doc.Type + ".html");
+            StreamWriter writer = new StreamWriter(Constants.HTMLFolderPath + doc.Title + "-" + doc.Type + ".html");
             writer.Write(sb.ToString());
             writer.Close();
 
@@ -107,15 +142,16 @@ namespace Editor2.Utils
                     return "<h2>" + el.Content + "</h2>";
                 case "SubHeading":
                     return "<h3>" + el.Content + "</h3>";
+                case "Text":
+                    return "<p>" + el.Content + "</p>";                
                 case "Code":
-                    return "<code>" + el.Content + "</code>";
-                
+                    return "<code>" + el.Content + "</code>";                
                 case "OL":
                     return HandleOL(el);
                 case "UL":
-                    return HandleUL(el);
-                
-                default:
+                    return HandleUL(el);     
+                // default case will allow insertion of custom html
+                default:                     
                     return el.Content;
             }
         }
@@ -129,10 +165,9 @@ namespace Editor2.Utils
             {
                 sb.Append("<li>");
                 sb.Append(Item);
-                sb.Append("</li>");
+                sb.AppendLine("</li>");
             }
             sb.AppendLine("</ol>");
-
             return sb.ToString();
         }
 
@@ -146,10 +181,9 @@ namespace Editor2.Utils
             {
                 sb.Append("<li>");
                 sb.Append(Item);
-                sb.Append("</li>");
+                sb.AppendLine("</li>");
             }
             sb.AppendLine("</ul>");
-
             return sb.ToString();
         }
 
