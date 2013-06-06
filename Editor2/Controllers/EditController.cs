@@ -23,13 +23,13 @@ namespace Editor2.Controllers
             Element el1 = new Element();
             el1.Content = "content of el1";
             
-            el1.Postion = 2;
+           
             el1.Type = "Text";
 
             Element el2 = new Element();
             el2.Content = "content of el2";
             
-            el2.Postion = 1;
+            
             el2.Type = "Text";
 
             Element sub1 = new Element();

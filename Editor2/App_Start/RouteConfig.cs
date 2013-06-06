@@ -12,9 +12,20 @@ namespace Editor2
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("EditorApi.asmx");
-            routes.IgnoreRoute("EditorApi.asmx/AddElementToDoc");
+            // operations
+            routes.IgnoreRoute("EditorApi.asmx/DocCreate");
+            routes.IgnoreRoute("EditorApi.asmx/DocDelete");
+            routes.IgnoreRoute("EditorApi.asmx/ElementCreate");
+            routes.IgnoreRoute("EditorApi.asmx/ElementDelete");
+            routes.IgnoreRoute("EditorApi.asmx/ElementEdit");
+            routes.IgnoreRoute("EditorApi.asmx/ElementMove");
+            //utils
+            routes.IgnoreRoute("EditorApi.asmx/GetNumElementsInDoc");
+            routes.IgnoreRoute("EditorApi.asmx/GetDocXml");
+            routes.IgnoreRoute("EditorApi.asmx/GetDocHtml");            
+            // testing
             routes.IgnoreRoute("EditorApi.asmx/TestHtml");
-            routes.IgnoreRoute("EditorApi.asmx/CreateNewDoc");
+            
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
 

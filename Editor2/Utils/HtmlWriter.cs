@@ -13,6 +13,16 @@ namespace Editor2.Utils
         public static Dictionary<string, string> Mappings = new Dictionary<string, string>();
         //private static string FolderPath = "C:\\Users\\TomR\\";
         private static string ffs = @"<script>
+                                    var title_element = $('#page-title').html().replace(/ /g,'').split('-'); //bit of a hack but oh well..
+                                    var name = title_element[0];
+                                    var type1 = title_element[1];
+                                    var id;
+                                    
+                                    
+
+                                    $('#myModal').click( function(){
+                                        
+                                    });
 
                                     $('div.multi-element').hover(function(){
                                         jQuery(this).css({ ""border"": ""2px solid red"" });
@@ -29,13 +39,28 @@ namespace Editor2.Utils
                                     });
 
                                     $('div.element').click( function (e) {
-	                                    var id = $(this).attr('id');
+                                        
+	                                    id = $(this).attr('id');
+                                        
 	                                    $('#edit-element').html(
 		                                    $(this).html())
 	                                    $('#edit-element').attr('contentEditable', true);
-	
+	                        
 	                                    $('#myModal').toggle();
-                                    })
+                                    });
+
+                                    $('#close-button').click( function() {
+                                        $('#myModal').hide();
+                                    });    
+
+                                    $('#save-button').click( function(){
+                                        updatedHtml = $('#edit-element');
+                                        updatedContent = updatedHtml.text();
+                                        $.ajax({ type: ""POST"", url: ""http://localhost:63169/EditorApi.asmx/ElementEdit"", data: { title: name, type: type1, element_id: id, updatedContent: updatedContent }})
+                                        $('#'+id).html($('#edit-element').html());
+                                        $('#myModal').hide();
+                                    }); 
+
                                     //$('#modal-title').html($(
 
                                     var children = $('div.multi-element').children();
@@ -66,17 +91,17 @@ namespace Editor2.Utils
                                     <p id=""edit-element"">[CLICKED_ELEMENT]</p>
                                 </div>
                                 <div class=""modal-footer"">
-                                    <button class=""btn"" data-dismiss=""modal"" aria-hidden=""true"">Close</button>
+                                    <button id=""close-button"" class=""btn"" data-dismiss=""modal"" aria-hidden=""true"">Close</button>
                                     <button id=""save-button"" class=""btn btn-primary"">Save changes</button>
                                 </div>
-                            </div>";
+                            </div> <!-- /modal -->";
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("<!DOCTYPE html>");
 
             sb.AppendLine("<html lang=\"en\">");
             
-            sb.AppendLine("<head>");            
+            sb.AppendLine("<head>");
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/docs.css\"></link>");
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/bootstrap-responsive.css\"></link>");
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/bootstrap.css\"></link>");
@@ -91,26 +116,29 @@ namespace Editor2.Utils
             sb.AppendLine("<div class=\"container\">");
             sb.AppendLine("<a onclick=\"LoadElement()\" href=\"#myModal\" role=\"button\" class=\"btn\" data-toggle=\"modal\">Launch demo modal</a>");
             sb.AppendLine(modal);
-            sb.AppendLine("<h2 id=\"page-title\">" + doc.Title + "</h2>");
-
-            sb.AppendLine("<div id=\"container\">");
+            sb.AppendLine("<h2 id=\"page-title\">" + doc.Title + " - " + doc.Type + "</h2>");
+            sb.AppendLine("<section id=\"gridSystem\">");
             foreach (Element el in doc.Elements)
             {
                 if (el.SubElements == null || el.SubElements.Count == 0)
                 {
-                    sb.AppendLine("<div class=\"element\" id=\"" + el.ElementId + "\">");
-                    sb.AppendLine(HandleElement(el));
-                    sb.AppendLine("</div>");
+                    sb.AppendLine("<div class=\"row-fluid show-grid\">");
+                    sb.Append("<div class=\"element span12\" id=\"" + el.ElementId + "\">");
+                    sb.Append(HandleElement(el));
+                    sb.Append("</div>");
+                    sb.AppendLine("</div> <!-- /row -->");
                 }
                 else
                 {
-                    sb.AppendLine("<div class=\"multi-element\" id=\"" + el.ElementId + "\">");
+                    sb.AppendLine("<div class=\"row-fluid show-grid\">");
+                    sb.Append("<div class=\"multi-element span 12\" id=\"" + el.ElementId + "\">");
                     sb.AppendLine(HandleSubElements(el));
                     sb.AppendLine("</div>");
+                    sb.AppendLine("</div> <!-- /row -->");
                 }
             }
-            sb.AppendLine("</div>");
-            sb.AppendLine("</div>");
+            sb.AppendLine("</section>");
+            sb.AppendLine("</div> <!-- /container -->");
 
             // FNAR : chrome won't load .js file so I#'m puting the script here.. sigh :(
             sb.Append(ffs);
@@ -131,11 +159,6 @@ namespace Editor2.Utils
 
         public static string HandleElement(Element el)
         {
-            //string id;
-            //if (el.id != null && el.id != String.Empty)
-            //{
-            //    id = el.id;
-            //}
             switch (el.Type)
             {
                 case "Heading":
@@ -143,7 +166,7 @@ namespace Editor2.Utils
                 case "SubHeading":
                     return "<h3>" + el.Content + "</h3>";
                 case "Text":
-                    return "<p>" + el.Content + "</p>";                
+                    return "<span>" + el.Content + "</span>/n";
                 case "Code":
                     return "<code>" + el.Content + "</code>";                
                 case "OL":

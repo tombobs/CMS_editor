@@ -26,9 +26,6 @@ namespace Editor2.Models
         public List<Element> SubElements;
 
         [XmlAttribute]
-        public int Postion;
-
-        [XmlAttribute]
         public string Type;//{ H1, H2, Text, OL, UL };
 
        // public enum Types { H1, H2, Text, OL, UL };

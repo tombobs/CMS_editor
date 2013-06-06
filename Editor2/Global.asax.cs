@@ -16,6 +16,7 @@ namespace Editor2
     {
         protected void Application_Start()
         {
+           // HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*");
             AreaRegistration.RegisterAllAreas();
 
             WebApiConfig.Register(GlobalConfiguration.Configuration);
