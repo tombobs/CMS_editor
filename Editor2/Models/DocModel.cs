@@ -33,13 +33,13 @@ namespace Editor2.Models
             DocId = Guid.NewGuid();
         }
 
-        public void InsertElement(Element element, int pos) // offset = displacement from first element (0 = add as first element)
+        public void InsertElement(Element element, int position) // offset = displacement from first element (0 = add as first element)
         {
-            if (this.Elements.Count < pos)
+            if (this.Elements.Count < position)
             {
-                throw new Exception("Cannot insert at position : " + pos + ", there are only " + this.Elements.Count + " elements in this doc.");
+                throw new Exception("Cannot insert at position : " + position + ", there are only " + this.Elements.Count + " elements in this doc.");
             }
-            this.Elements.Insert(pos, element);
+            this.Elements.Insert(position, element);
         }
 
         public void AddElement(Element element)
@@ -47,7 +47,7 @@ namespace Editor2.Models
             this.Elements.Add(element);
         }
 
-        public Element getElementByPosition(int position)
+        public Element GetElementByPosition(int position)
         {
             if (this.Elements.Count < position)
             {
@@ -56,26 +56,20 @@ namespace Editor2.Models
             return this.Elements[position];
         }
 
-        public Element getElementByGuid(Guid guid)
+        public Element GetElementByGuid(Guid guid)
         {
             Element result = this.Elements.Find(
-                delegate(Element bk)
+                delegate(Element el)
                 {
-                    return bk.ElementId == guid;
+                    return el.ElementId == guid;
                 }
             );
             return result;
         }
 
         public Boolean ElementExists(Guid guid)
-        {            
-            Element result = this.Elements.Find(
-                delegate(Element bk)
-                {
-                    return bk.ElementId == guid;
-                }
-            );
-            return (result != null);
+        {
+            return (GetElementByGuid(guid) != null);
         }
     }
 }

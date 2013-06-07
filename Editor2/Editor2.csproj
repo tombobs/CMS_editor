@@ -39,6 +39,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ColorCode">
+      <HintPath>..\packages\ColorCode.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -182,6 +185,7 @@
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\HtmlWriter.cs" />
     <Compile Include="Utils\SerialisationService.cs" />
+    <Compile Include="Utils\SyntaxHighlighter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />

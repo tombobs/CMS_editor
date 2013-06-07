@@ -9,6 +9,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Editor2.Models;
 using Editor2.Utils;
+using System.Text;
 
 namespace Editor2
 {
@@ -22,58 +23,58 @@ namespace Editor2
      [System.Web.Script.Services.ScriptService]
     public class EditorApi : System.Web.Services.WebService
     {
-
         [WebMethod]
         public int GetNumElementsInDoc(string title, string type)
         {
-            DocModel doc = SerialisationService.GetDocByTitleAndType(title, type);
+            DocModel doc = SerialisationService.GetDoc(title, type);
             return doc.Elements.Count;
         }
 
         [WebMethod]
-        public void ElementCreate(string DocTitle, string DocType, string ElementContent, string ElementType, int pos)
+        public void ElementCreate(string DocTitle, string DocType, string ElementContent, string ElementType, int position)
         {
-            pos--; // lets just call the first element '1' in the front end..
-            DocModel doc = SerialisationService.GetDocByTitleAndType(DocTitle, DocType);
+            position--; // let's start counting at 1 in the front end..
+            DocModel doc = SerialisationService.GetDoc(DocTitle, DocType);
             
-            if (doc.Elements.Count < pos)   // this should never happen but if it does 
+            if (doc.Elements.Count < position)   // this should never happen but if it does 
             {                               // then we'll just stick the element at the bottom            
-                pos = doc.Elements.Count;
+                position = doc.Elements.Count;
             }
             Element element = new Element();
             element.Content = ElementContent;
             element.Type = ElementType;            
-            doc.Elements.Insert(pos, element);            
+            doc.Elements.Insert(position, element);            
             UpdateDoc(doc);
         }
 
         [WebMethod]
         public void DocDelete(string title, string type)
         {
-            File.Delete(Constants.HTMLFolderPath + title + type + ".xml");
+            File.Delete(Constants.HTMLFolderPath + title + "-" + type + ".html");
+            File.Delete(Constants.XMLFolderPath + title + "-" + type + ".xml");
         }
 
 
-       [WebMethod]
+        [WebMethod]
         public XmlDocument GetDocXml(string title)
         {
-            System.IO.StreamReader read = new System.IO.StreamReader(Constants.XMLFolderPath + title + ".xml");
+            System.IO.StreamReader file = new System.IO.StreamReader(Constants.XMLFolderPath + title + ".xml");
             XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(read.ReadToEnd());
+            xmlDoc.LoadXml(file.ReadToEnd());
             return xmlDoc;
         }
 
         [WebMethod]
         public string GetDocHtml(string title, string type)
         {
-            DocModel doc = SerialisationService.GetDocByTitleAndType(title, type);
-            return HtmlWriter.GenerateHtml(doc);    
+            DocModel doc = SerialisationService.GetDoc(title, type);
+            return HtmlWriter.MakeHtml(doc);    
         }
 
         [WebMethod]
         public void DocCreate(string name, string type)
         {
-            DocModel doc = SerialisationService.GetDocByTitleAndType(name , type);
+            DocModel doc = SerialisationService.GetDoc(name , type);
             if (doc == null)
             {
                 DocModel NewDoc = new DocModel(name, type);
@@ -83,26 +84,57 @@ namespace Editor2
         }
 
         [WebMethod]
-        public void ElementEdit(string title, string type, string element_id, string updatedContent)
+        public void CreateHtml(string title, string type) 
+        {
+            HtmlWriter.WriteHtml(title, type);
+        }
+
+        // this one handles list elements
+        [WebMethod]
+        public void EditElement(string title, string type, string ElementId,
+            List<string> updatedItems) 
+        
         {
             HttpContext.Current.Response.ClearHeaders();
             HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*");
-            DocModel document = SerialisationService.GetDocByTitleAndType(title, type);
-            Element element = document.getElementByGuid(Guid.Parse(element_id));
+            DocModel doc = SerialisationService.GetDoc(title, type);
+            Element element = doc.GetElementByGuid(Guid.Parse(ElementId));
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0 ; i < updatedItems.Count - 1 ; i++)
+            {
+                sb.Append(updatedItems[i]);
+            }
+            sb.Append(updatedItems[updatedItems.Count - 1]);
+            
+            int pos = doc.Elements.IndexOf(element);
+            doc.Elements.Remove(element);
+            element.Content = sb.ToString();
+            doc.Elements.Insert(pos, element);
+            UpdateDoc(doc);
+            HttpContext.Current.Response.End();
+        }
+
+        [WebMethod]
+        public void ElementEdit(string title, string type, string elementId, string updatedContent)
+        {
+            HttpContext.Current.Response.ClearHeaders();
+            HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*");
+            DocModel document = SerialisationService.GetDoc(title, type);
+            Element element = document.GetElementByGuid(Guid.Parse(elementId));
             int pos = document.Elements.IndexOf(element);
             document.Elements.Remove(element);            
             element.Content = updatedContent;
             document.Elements.Insert(pos, element);
-            UpdateDoc(document);
-            this.TestHtml(title, type);
+            UpdateDoc(document);            
             HttpContext.Current.Response.End();
         }
 
         [WebMethod]
         public void ElementDelete(string title, string type, string ElementId)
         {
-            DocModel doc = SerialisationService.GetDocByTitleAndType(title, type);
-            Element element = doc.getElementByGuid(Guid.Parse(ElementId));
+            DocModel doc = SerialisationService.GetDoc(title, type);
+            Element element = doc.GetElementByGuid(Guid.Parse(ElementId));
             doc.Elements.Remove(element);
             UpdateDoc(doc);
         }
@@ -111,14 +143,14 @@ namespace Editor2
         public void ElementMove(string title, string type, string ElementId, int newPos)
         {
             newPos--; // lets just call the first element '1' in the front end..
-            DocModel doc = SerialisationService.GetDocByTitleAndType(title, type);
+            DocModel doc = SerialisationService.GetDoc(title, type);
             if (newPos > doc.Elements.Count)
             {
                 throw new Exception("Doc only has " + doc.Elements.Count + " elements - cannot move to position:" + newPos);
             }
             else
             {
-                Element element = doc.getElementByGuid(Guid.Parse(ElementId));
+                Element element = doc.GetElementByGuid(Guid.Parse(ElementId));
                 doc.Elements.Remove(element);
                 doc.Elements.Insert(newPos, element);
                 UpdateDoc(doc);
@@ -126,76 +158,10 @@ namespace Editor2
         }
 
         public void UpdateDoc(DocModel doc)
-        {
-            // assume we're sure we want to update it (checked valid name, elements etc...)
+        {            
             SerialisationService.SerialiseDoc(doc);
+            HtmlWriter.MakeHtml(doc);
         }
-
-
-
-
-
-
-
-
-
-
-        [WebMethod]
-        public string TestHtml(string title, string type)
-        {
-            DocModel doc = SerialisationService.GetDocByTitleAndType(title, type);
-            return HtmlWriter.GenerateHtml(doc);            
-        }
-       
-
-        [WebMethod]
-        public string TestHtml2()
-        {
-            DocModel doc = new DocModel();
-            doc.StandardFormat = true;
-            doc.Title = "doc2";
-            doc.Type = "Overview";
-
-
-            Element el1 = new Element();
-            el1.Content = "content of el1";
-            
-           
-            el1.Type = "Text";
-
-            Element el2 = new Element();
-            el2.Content = "content of el2";
-            
-            
-            el2.Type = "Text";
-
-            Element sub1 = new Element();
-            sub1.Content = "sub1 content";
-            sub1.Type = "UL";
-            sub1.Content = "s1item1,s1item2,s1item3";
-
-
-            Element sub2 = new Element();
-            sub2.Content = "sub2 content";
-            sub2.Type = "OL";
-            sub2.Content = "s2item1,s2item2,s2item3";
-
-            el1.SubElements = new List<Element>();
-
-            el1.SubElements.Add(sub1);
-            el1.SubElements.Add(sub2);
-
-            doc.Elements.Add(el1);
-            doc.Elements.Add(el2);
-            //doc.elements
-
-
-
-            string result = HtmlWriter.GenerateHtml(doc);
-
-            return result;
-        }
-
     }
 }
 

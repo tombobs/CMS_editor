@@ -51,7 +51,7 @@ namespace Editor2.Controllers
             //doc.elements
 
 
-            HtmlWriter.GenerateHtml(doc);
+            HtmlWriter.MakeHtml(doc);
 
             
 

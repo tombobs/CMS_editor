@@ -18,7 +18,7 @@ namespace Editor2.Tests
 
             Guid ExpectedGuid = expected.ElementId;
 
-            Element actual = doc.getElementByGuid(ExpectedGuid);
+            Element actual = doc.GetElementByGuid(ExpectedGuid);
 
             Debug.Equals(actual, expected);
 

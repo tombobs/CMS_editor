@@ -10,77 +10,17 @@ namespace Editor2.Utils
 {
     public class HtmlWriter
     {
-        public static Dictionary<string, string> Mappings = new Dictionary<string, string>();
-        //private static string FolderPath = "C:\\Users\\TomR\\";
-        private static string ffs = @"<script>
-                                    var title_element = $('#page-title').html().replace(/ /g,'').split('-'); //bit of a hack but oh well..
-                                    var name = title_element[0];
-                                    var type1 = title_element[1];
-                                    var id;
-                                    
-                                    
 
-                                    $('#myModal').click( function(){
-                                        
-                                    });
-
-                                    $('div.multi-element').hover(function(){
-                                        jQuery(this).css({ ""border"": ""2px solid red"" });
-    
-                                    },function(){
-                                        jQuery(this).css({ ""border"": ""none"" });
-                                    });
-
-                                    $('div.element').hover(function(){
-                                        jQuery(this).css({ ""border"": ""2px solid red"" });
-    
-                                    },function(){
-                                        jQuery(this).css({ ""border"": ""none"" });
-                                    });
-
-                                    $('div.element').click( function (e) {
-                                        
-	                                    id = $(this).attr('id');
-                                        
-	                                    $('#edit-element').html(
-		                                    $(this).html())
-	                                    $('#edit-element').attr('contentEditable', true);
-	                        
-	                                    $('#myModal').toggle();
-                                    });
-
-                                    $('#close-button').click( function() {
-                                        $('#myModal').hide();
-                                    });    
-
-                                    $('#save-button').click( function(){
-                                        updatedHtml = $('#edit-element');
-                                        updatedContent = updatedHtml.text();
-                                        $.ajax({ type: ""POST"", url: ""http://localhost:63169/EditorApi.asmx/ElementEdit"", data: { title: name, type: type1, element_id: id, updatedContent: updatedContent }})
-                                        $('#'+id).html($('#edit-element').html());
-                                        $('#myModal').hide();
-                                    }); 
-
-                                    //$('#modal-title').html($(
-
-                                    var children = $('div.multi-element').children();
-
-
-                                    </script>";
-
-
-        public static void SetUpMappings()
+        public static void WriteHtml(string title, string type)
         {
-            Mappings.Add("<b>", "<span class=\"bold\">");
-            Mappings.Add("</b>", "</span>");
-            Mappings.Add("<i>", "<span class=\"italic\">");
-            Mappings.Add("</i>", "</span>");
-            Mappings.Add("<u>", "<span class=\"underline\">");
-            Mappings.Add("</u>", "</span>");
-            //Mappings.Add
+            DocModel doc = SerialisationService.GetDoc(title, type);
+            string html = MakeHtml(doc);
+            StreamWriter writer = new StreamWriter(Constants.HTMLFolderPath + doc.Title + "-" + doc.Type + ".html");
+            writer.Write(html);
+            writer.Close();
         }
 
-        public static string GenerateHtml(DocModel doc)
+        public static string MakeHtml(DocModel doc)
         {
             string modal = @"<div id=""myModal"" class=""modal hide fade in"" tabindex=""-1"" role=""dialog"" aria-labelledby=""myModalLabel"" aria-hidden=""true"">
                                 <div class=""modal-header"">
@@ -88,7 +28,7 @@ namespace Editor2.Utils
                                     <h3 id=""modal-title"">Editing - [PAGE_TITLE]</h3>
                                 </div>
                                 <div class=""modal-body"">
-                                    <p id=""edit-element"">[CLICKED_ELEMENT]</p>
+                                    <p id=""edit-element""></p>
                                 </div>
                                 <div class=""modal-footer"">
                                     <button id=""close-button"" class=""btn"" data-dismiss=""modal"" aria-hidden=""true"">Close</button>
@@ -98,23 +38,16 @@ namespace Editor2.Utils
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("<!DOCTYPE html>");
-
             sb.AppendLine("<html lang=\"en\">");
-            
+
             sb.AppendLine("<head>");
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/docs.css\"></link>");
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/bootstrap-responsive.css\"></link>");
             sb.AppendLine("<link rel=\"stylesheet\" href=\"http://twitter.github.io/bootstrap/assets/css/bootstrap.css\"></link>");
-            sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/jquery.js\"></script>");
-            sb.AppendLine("<script type=\"text/javascript\" src=\"Editor.js\"></script>");
-            sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/bootstrap-modal.js\"></script>");
-            sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/holder/holder.js\"></script>");
-            
             sb.AppendLine("</head>");
 
             sb.AppendLine("<body>");
             sb.AppendLine("<div class=\"container\">");
-            sb.AppendLine("<a onclick=\"LoadElement()\" href=\"#myModal\" role=\"button\" class=\"btn\" data-toggle=\"modal\">Launch demo modal</a>");
             sb.AppendLine(modal);
             sb.AppendLine("<h2 id=\"page-title\">" + doc.Title + " - " + doc.Type + "</h2>");
             sb.AppendLine("<section id=\"gridSystem\">");
@@ -139,21 +72,12 @@ namespace Editor2.Utils
             }
             sb.AppendLine("</section>");
             sb.AppendLine("</div> <!-- /container -->");
-
-            // FNAR : chrome won't load .js file so I#'m puting the script here.. sigh :(
-            sb.Append(ffs);
-
-
-
+            sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/jquery.js\"></script>");
+            sb.AppendLine("<script type=\"text/javascript\" src=\"Editor.js\"></script>");
+            sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/bootstrap-modal.js\"></script>");
+            sb.AppendLine("<script src=\"http://twitter.github.io/bootstrap/assets/js/holder/holder.js\"></script>");
             sb.AppendLine("</body>");
-
             sb.AppendLine("</html>");
-
-
-            StreamWriter writer = new StreamWriter(Constants.HTMLFolderPath + doc.Title + "-" + doc.Type + ".html");
-            writer.Write(sb.ToString());
-            writer.Close();
-
             return sb.ToString();
         }
 
@@ -172,10 +96,9 @@ namespace Editor2.Utils
                 case "OL":
                     return HandleOL(el);
                 case "UL":
-                    return HandleUL(el);     
-                // default case will allow insertion of custom html
-                default:                     
-                    return el.Content;
+                    return HandleUL(el);
+                default:
+                    return el.Content; // this will allow insertion of custom html
             }
         }
 
@@ -193,7 +116,6 @@ namespace Editor2.Utils
             sb.AppendLine("</ol>");
             return sb.ToString();
         }
-
         
         public static string HandleUL(Element el)
         {
@@ -219,6 +141,19 @@ namespace Editor2.Utils
             }
             return sb.ToString();
         }
-
     }
+
+    //public static Dictionary<string, string> Mappings = new Dictionary<string, string>();
+    ////this whole class is a massive hack.. should use a library here really.
+
+    //public static void SetUpMappings()
+    //{
+    //    Mappings.Add("<b>", "<span class=\"bold\">");
+    //    Mappings.Add("</b>", "</span>");
+    //    Mappings.Add("<i>", "<span class=\"italic\">");
+    //    Mappings.Add("</i>", "</span>");
+    //    Mappings.Add("<u>", "<span class=\"underline\">");
+    //    Mappings.Add("</u>", "</span>");
+    //    //Mappings.Add
+    //}
 }

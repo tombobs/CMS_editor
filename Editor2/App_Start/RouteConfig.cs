@@ -13,10 +13,12 @@ namespace Editor2
         {
             routes.IgnoreRoute("EditorApi.asmx");
             // operations
+            routes.IgnoreRoute("EditorApi.asmx/CreateHtml");
             routes.IgnoreRoute("EditorApi.asmx/DocCreate");
             routes.IgnoreRoute("EditorApi.asmx/DocDelete");
             routes.IgnoreRoute("EditorApi.asmx/ElementCreate");
             routes.IgnoreRoute("EditorApi.asmx/ElementDelete");
+            routes.IgnoreRoute("EditorApi.asmx/EditElement");
             routes.IgnoreRoute("EditorApi.asmx/ElementEdit");
             routes.IgnoreRoute("EditorApi.asmx/ElementMove");
             //utils
@@ -25,7 +27,7 @@ namespace Editor2
             routes.IgnoreRoute("EditorApi.asmx/GetDocHtml");            
             // testing
             routes.IgnoreRoute("EditorApi.asmx/TestHtml");
-            
+            routes.IgnoreRoute("EditorApi.asmx/test");
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
 
